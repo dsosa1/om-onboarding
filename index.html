@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OM Onboarding</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1628;--navy2:#111f38;--navy3:#1a2f50;
+  --blue:#38b6e8;--blue2:#1a9fd4;--orange:#e85d04;
+  --green:#22c55e;--text:#f0f4ff;--muted:#7a9cc8;
+  --card:#162040;--border:#1e3358;--red:#ef4444;
+}
+body{background:var(--navy);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--blue);color:var(--navy)}
+.btn-primary:hover{background:var(--blue2)}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{opacity:.9}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+input[type=text],input[type=url],select{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;outline:none;transition:border .2s;font-family:inherit}
+input:focus,select:focus{border-color:var(--blue)}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.field{margin-bottom:18px}
+.spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.25);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* DASHBOARD */
+#dash-screen{padding:0}
+.dash-header{background:var(--navy2);border-bottom:1px solid var(--border);padding:18px 36px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{width:42px;height:42px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--navy)}
+.logo-text{font-size:14px;font-weight:700;line-height:1.2}
+.logo-sub{font-size:11px;color:var(--muted);font-weight:400}
+.dash-body{padding:36px;flex:1}
+.dash-title{font-size:26px;font-weight:800;margin-bottom:6px}
+.dash-sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+.partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.partner-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;cursor:pointer;transition:all .2s}
+.partner-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.pc-name{font-size:17px;font-weight:700;margin-bottom:3px}
+.pc-url{font-size:12px;color:var(--muted)}
+.pc-delete{background:none;border:none;color:var(--border);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:all .2s}
+.pc-delete:hover{color:var(--red);background:#2a1010}
+.pc-bar-wrap{background:var(--navy3);border-radius:99px;height:7px;margin-bottom:7px;overflow:hidden}
+.pc-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .6s}
+.pc-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:10px}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px}
+.badge-blue{background:#1a3a5c;color:var(--blue)}
+.badge-green{background:#14532d;color:var(--green)}
+.empty-state{text-align:center;padding:80px 20px;color:var(--muted)}
+.empty-icon{font-size:52px;margin-bottom:14px}
+.empty-state h3{font-size:20px;color:var(--text);margin-bottom:8px}
+
+/* SETUP */
+#setup-screen{background:var(--navy);justify-content:center;align-items:center;padding:40px 20px}
+.setup-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:44px;max-width:540px;width:100%}
+.setup-title{font-size:28px;font-weight:800;margin-bottom:6px}
+.setup-sub{color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.6}
+.btn-row{display:flex;gap:10px;margin-top:8px}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--navy3)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:#0d1e3a}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-text{font-size:14px;color:var(--muted);line-height:1.5}
+.upload-name{color:var(--green);font-size:13px;margin-top:10px;font-weight:600;display:none}
+.pdf-processing{color:var(--blue);font-size:13px;margin-top:10px;display:none;align-items:center;gap:8px;justify-content:center}
+
+/* ONBOARDING */
+#onboard-screen{padding:0}
+.ob-header{background:var(--navy2);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:16px}
+.ob-back{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:5px;padding:7px 11px;border-radius:8px;transition:all .2s}
+.ob-back:hover{color:var(--text);background:var(--navy3)}
+.ob-partner-info{flex:1}
+.ob-partner-name{font-size:15px;font-weight:700}
+.ob-partner-meta{font-size:12px;color:var(--muted);margin-top:1px}
+.ob-header-right{display:flex;align-items:center;gap:12px}
+.ob-progress-wrap{display:flex;align-items:center;gap:10px}
+.ob-progress-bar{width:140px;height:7px;background:var(--navy3);border-radius:99px;overflow:hidden}
+.ob-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .5s}
+.ob-pct{font-size:14px;font-weight:700;color:var(--blue);min-width:34px}
+.ob-body{flex:1;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.ob-sidebar{width:248px;background:var(--navy2);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;padding:16px 0}
+.sidebar-section-label{font-size:10px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;padding:14px 16px 5px}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:9px;margin:0 6px;cursor:pointer;transition:all .15s;font-size:13px;color:var(--muted)}
+.sidebar-item:hover{background:var(--navy3);color:var(--text)}
+.sidebar-item.active{background:#1a3a5c;color:var(--blue);font-weight:600}
+.sidebar-item.done{color:var(--green)}
+.s-check{width:17px;height:17px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.sidebar-item.done .s-check{background:var(--green);border-color:var(--green);color:#fff}
+.sidebar-item.active .s-check{border-color:var(--blue)}
+
+/* MAIN */
+.ob-main{flex:1;overflow-y:auto}
+.step-hero{background:linear-gradient(135deg,var(--navy2),var(--navy3));border-bottom:1px solid var(--border);padding:36px 44px}
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--navy);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:11px;color:var(--muted);margin-bottom:14px}
+.step-num{color:var(--blue);font-weight:700}
+.step-title{font-size:32px;font-weight:800;margin-bottom:8px;line-height:1.15}
+.step-desc{color:var(--muted);font-size:15px;line-height:1.7;max-width:600px}
+.step-content{padding:32px 44px}
+.step-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 44px;border-top:1px solid var(--border);background:var(--navy2)}
+
+/* AI BOX */
+.ai-output-box{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.ai-box-header{background:var(--navy3);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.ai-badge{background:var(--blue);color:var(--navy);font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+.ai-box-title{font-size:13px;font-weight:600;margin-left:8px}
+.ai-box-body{padding:22px;font-size:14px;line-height:1.85;color:#b8d4f0;min-height:80px}
+.ai-box-body.loading{color:var(--muted);font-style:italic;display:flex;align-items:center;gap:10px}
+.ai-actions{padding:0 18px 14px;display:flex;gap:8px}
+.copy-btn{background:var(--navy3);border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:7px;cursor:pointer;font-size:12px;transition:all .2s}
+.copy-btn:hover{border-color:var(--blue);color:var(--blue)}
+.regen-btn{background:var(--navy3);border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:7px;cursor:pointer;font-size:12px;transition:all .2s;display:flex;align-items:center;gap:6px}
+.regen-btn:hover{border-color:var(--orange);color:var(--orange)}
+
+/* INSTRUCTION BOX */
+.instruction-box{background:#0d1e0d;border:1px solid #1a4d1a;border-radius:12px;padding:18px 22px;margin-bottom:16px}
+.instruction-label{color:var(--green);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.instruction-text{font-size:14px;line-height:1.75;color:#a8d8a8}
+
+/* NOTES */
+.notes-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-top:20px}
+.notes-card-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.notes-area{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit;resize:vertical;min-height:72px;transition:border .2s;line-height:1.6}
+.notes-area:focus{border-color:var(--blue)}
+
+/* DONE BANNER */
+.done-banner{background:#0d2e1a;border:1px solid var(--green);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.done-banner-text{font-size:14px;color:var(--green);font-weight:600}
+.done-banner-sub{font-size:12px;color:#5a9a6a;margin-top:2px}
+
+/* CELEBRATION */
+.celebration{position:fixed;inset:0;background:rgba(10,22,40,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;text-align:center;padding:40px}
+.celebration h1{font-size:44px;font-weight:900;margin-bottom:14px}
+.celebration p{font-size:17px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.confetti-row{font-size:34px;letter-spacing:8px;margin-bottom:20px}
+
+@media(max-width:680px){.ob-sidebar{display:none}.step-hero,.step-content,.step-footer{padding:22px}}
+</style>
+</head>
+<body>
+
+<!-- DASHBOARD -->
+<div id="dash-screen" class="screen active">
+  <div class="dash-header">
+    <div class="logo">
+      <div class="logo-mark">OM</div>
+      <div>
+        <div class="logo-text">OM Performance Marketing</div>
+        <div class="logo-sub">Partner Onboarding System</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="startNewPartner()">+ New Partner</button>
+  </div>
+  <div class="dash-body">
+    <div class="dash-title">Partner Dashboard</div>
+    <div class="dash-sub">Track onboarding progress for every dental partner.</div>
+    <div id="partners-grid" class="partners-grid"></div>
+    <div id="empty-state" class="empty-state" style="display:none">
+      <div class="empty-icon">🦷</div>
+      <h3>No partners yet</h3>
+      <p>Click "New Partner" to start your first onboarding.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="setup-screen" class="screen">
+  <div class="setup-box">
+    <div class="setup-title">Add a New Partner</div>
+    <div class="setup-sub">Enter the basics — the AI handles the rest.</div>
+    <div class="field"><label>Practice Name</label><input type="text" id="s-name" placeholder="e.g. SchoolHouse Orthodontics"/></div>
+    <div class="field"><label>Practice Website</label><input type="url" id="s-url" placeholder="https://www.theirwebsite.com"/></div>
+    <div class="field"><label>Location / City, State</label><input type="text" id="s-loc" placeholder="e.g. Chicago, IL"/></div>
+    <div class="field">
+      <label>Strategyzer Document (PDF)</label>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" accept=".pdf" id="pdf-input" onchange="handlePDF(this)"/>
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Click or drag & drop the Strategyzer PDF here</div>
+        <div class="upload-name" id="upload-name"></div>
+        <div class="pdf-processing" id="pdf-processing"><span class="spinner" style="border-top-color:var(--blue)"></span> Reading PDF…</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="showScreen('dash-screen')">Cancel</button>
+      <button class="btn btn-primary" id="create-btn" onclick="createPartner()">Start Onboarding →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboard-screen" class="screen">
+  <div class="ob-header">
+    <button class="ob-back" onclick="showScreen('dash-screen');renderDash()">← Dashboard</button>
+    <div class="ob-partner-info">
+      <div class="ob-partner-name" id="ob-name"></div>
+      <div class="ob-partner-meta" id="ob-meta"></div>
+    </div>
+    <div class="ob-header-right">
+      <div class="ob-progress-wrap">
+        <div class="ob-progress-bar"><div class="ob-progress-fill" id="ob-fill" style="width:0%"></div></div>
+        <div class="ob-pct" id="ob-pct">0%</div>
+      </div>
+      <button class="btn btn-sm btn-ghost" onclick="exportReport()">📤 Export</button>
+    </div>
+  </div>
+  <div class="ob-body">
+    <div class="ob-sidebar" id="ob-sidebar"></div>
+    <div class="ob-main" id="ob-main"></div>
+  </div>
+</div>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const STEPS=[
+  {id:'market',section:'Research',label:'Market Research',icon:'🔍'},
+  {id:'strat',section:'Research',label:'Strategyzer Review',icon:'📋'},
+  {id:'pixels',section:'Basics & Setup',label:'Confirm All Pixels (GTM)',icon:'📡'},
+  {id:'conversions',section:'Basics & Setup',label:'Track ALL Conversions',icon:'🎯'},
+  {id:'cyfe',section:'Basics & Setup',label:'Create CYFE Dashboard',icon:'📊'},
+  {id:'clientgpt',section:'Basics & Setup',label:'ClientGPT Setup',icon:'🤖'},
+  {id:'descriptiondoc',section:'Basics & Setup',label:'Perfect Description Doc',icon:'📝'},
+  {id:'metadata',section:'SEO Basics',label:'Meta-Data — Core 10 Pages',icon:'🔖'},
+  {id:'llms',section:'SEO Basics',label:'Add LLMS.txt to Website',icon:'🧠'},
+  {id:'sitemap',section:'SEO Basics',label:'Submit Sitemap to GSC',icon:'🗺️'},
+  {id:'gmb',section:'SEO Basics',label:'Update GMB Profile',icon:'📍'},
+  {id:'maxconv',section:'Launch Paid Search',label:'Max Conversion Objective',icon:'🚀'},
+  {id:'allconv',section:'Launch Paid Search',label:'ALL Conversions Tracked',icon:'✅'},
+  {id:'nosearch',section:'Launch Paid Search',label:'No Search Network',icon:'🚫'},
+  {id:'sitelinks',section:'Launch Paid Search',label:'All Sitelinks / Extensions',icon:'🔗'},
+  {id:'metarm',section:'Launch Paid Social',label:'Meta: 14-30 Day RM (25%)',icon:'📣'},
+  {id:'metaacq',section:'Launch Paid Social',label:'Meta: Acquisition — Conv (50%)',icon:'💰'},
+  {id:'metatraf',section:'Launch Paid Social',label:'Meta: Acquisition — Traffic (25%)',icon:'🚗'},
+  {id:'phone',section:'CRO Requirements',label:'Visible Phone — Always',icon:'📞'},
+  {id:'booknav',section:'CRO Requirements',label:'Book + Phone in Nav',icon:'📅'},
+  {id:'cta',section:'CRO Requirements',label:'CTA in Hero Section',icon:'🎯'},
+  {id:'h1',section:'CRO Requirements',label:'Brand-Forward H1',icon:'🏷️'},
+  {id:'servicepages',section:'CRO Requirements',label:'Service / Location Pages',icon:'📄'},
+  {id:'reporting',section:'New Patient Reporting',label:'CallRail / New Patient Tracking',icon:'📈'},
+];
+const AI_STEPS=['market','strat','metadata','llms','gmb','descriptiondoc'];
+let partners={}, currentPartner=null, currentStepIndex=0, pendingPDFText='';
+
+// ── STORAGE ──
+async function saveAll(){try{await window.storage.set('om-partners-v3',JSON.stringify(partners));}catch(e){}}
+async function loadAll(){try{const r=await window.storage.get('om-partners-v3');if(r)partners=JSON.parse(r.value);}catch(e){}renderDash();}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ── PDF READING ──
+async function handlePDF(input){
+  const file=input.files[0];
+  if(!file)return;
+  const nameEl=document.getElementById('upload-name');
+  const procEl=document.getElementById('pdf-processing');
+  nameEl.style.display='none';
+  procEl.style.display='flex';
+  pendingPDFText='';
+  try{
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    let text='';
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      text+=content.items.map(it=>it.str).join(' ')+'\n';
+    }
+    pendingPDFText=text.trim();
+    procEl.style.display='none';
+    nameEl.textContent='✓ '+file.name;
+    nameEl.style.display='block';
+  }catch(e){
+    procEl.style.display='none';
+    nameEl.textContent='⚠ Could not read PDF — try another file.';
+    nameEl.style.display='block';
+    nameEl.style.color='var(--red)';
+  }
+}
+
+// ── DASHBOARD ──
+function calcPct(p){return Math.round((STEPS.filter(s=>p.checks&&p.checks[s.id]).length/STEPS.length)*100);}
+function renderDash(){
+  const grid=document.getElementById('partners-grid');
+  const empty=document.getElementById('empty-state');
+  const keys=Object.keys(partners);
+  if(!keys.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=keys.map(k=>{
+    const p=partners[k];const pct=calcPct(p);
+    return `<div class="partner-card" onclick="openPartner('${k}')">
+      <div class="pc-top">
+        <div><div class="pc-name">${p.name}</div><div class="pc-url">${p.url}</div></div>
+        <button class="pc-delete" onclick="event.stopPropagation();deletePartner('${k}')" title="Delete">✕</button>
+      </div>
+      <div class="pc-bar-wrap"><div class="pc-bar" style="width:${pct}%"></div></div>
+      <div class="pc-meta"><span style="font-weight:700;color:${pct===100?'var(--green)':'var(--text)'}">${pct}% complete</span><span>${p.location}</span></div>
+      <span class="badge ${pct===100?'badge-green':'badge-blue'}">${pct===100?'✓ Complete':'In Progress'}</span>
+    </div>`;
+  }).join('');
+}
+function deletePartner(k){if(!confirm('Delete this partner?'))return;delete partners[k];saveAll();renderDash();}
+
+// ── SETUP ──
+function startNewPartner(){
+  ['s-name','s-url','s-loc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pdf-input').value='';
+  document.getElementById('upload-name').style.display='none';
+  document.getElementById('pdf-processing').style.display='none';
+  pendingPDFText='';
+  showScreen('setup-screen');
+}
+function createPartner(){
+  const name=document.getElementById('s-name').value.trim();
+  const url=document.getElementById('s-url').value.trim();
+  const loc=document.getElementById('s-loc').value.trim();
+  if(!name||!url){alert('Please enter practice name and website.');return;}
+  const id='p_'+Date.now();
+  partners[id]={id,name,url,location:loc||'Unknown',strat:pendingPDFText,checks:{},aiOutputs:{},notes:{}};
+  saveAll();openPartner(id);
+}
+
+// ── OPEN PARTNER ──
+function openPartner(id){
+  currentPartner=id;const p=partners[id];
+  document.getElementById('ob-name').textContent=p.name;
+  document.getElementById('ob-meta').textContent=p.url+' · '+p.location;
+  renderSidebar();updateProgress();renderStep(0);showScreen('onboard-screen');
+}
+function renderSidebar(){
+  const p=partners[currentPartner];let html='',lastSec='';
+  STEPS.forEach((s,i)=>{
+    if(s.section!==lastSec){html+=`<div class="sidebar-section-label">${s.section}</div>`;lastSec=s.section;}
+    const done=p.checks&&p.checks[s.id];
+    html+=`<div class="sidebar-item ${done?'done':''}" id="sid-${i}" onclick="renderStep(${i})">
+      <div class="s-check">${done?'✓':''}</div>${s.icon} ${s.label}</div>`;
+  });
+  document.getElementById('ob-sidebar').innerHTML=html;
+}
+function setActiveSidebar(i){document.querySelectorAll('.sidebar-item').forEach((el,j)=>el.classList.toggle('active',j===i));}
+function updateProgress(){
+  const pct=calcPct(partners[currentPartner]);
+  document.getElementById('ob-fill').style.width=pct+'%';
+  document.getElementById('ob-pct').textContent=pct+'%';
+}
+
+// ── RENDER STEP ──
+function renderStep(i){
+  currentStepIndex=i;setActiveSidebar(i);
+  const step=STEPS[i];const p=partners[currentPartner];
+  const main=document.getElementById('ob-main');
+  main.innerHTML=buildStepHTML(step,i,p);main.scrollTop=0;
+  if(AI_STEPS.includes(step.id)&&!(p.aiOutputs&&p.aiOutputs[step.id]))setTimeout(()=>runAI(step.id),200);
+}
+function buildStepHTML(step,i,p){
+  const done=p.checks&&p.checks[step.id];
+  const isAI=AI_STEPS.includes(step.id);
+  const content=isAI?buildAIBox(step.id,aiTitle(step.id),p):buildInstructionStep(step,p);
+  const banner=done?`<div class="done-banner"><div style="font-size:22px">✅</div><div><div class="done-banner-text">Step marked complete</div><div class="done-banner-sub">Review anytime or continue forward.</div></div></div>`:'';
+  const notes=buildNotesPanel(step.id,p);
+  const nav=`<div class="step-footer">
+    <button class="btn btn-ghost" onclick="renderStep(${i-1})" ${i===0?'disabled':''}>← Previous</button>
+    <span style="color:var(--muted);font-size:13px">${i+1} / ${STEPS.length}</span>
+    ${i<STEPS.length-1
+      ?`<button class="btn btn-primary" onclick="markDone(${i})">Complete & Next →</button>`
+      :`<button class="btn btn-orange" onclick="markDoneFinish(${i})">Complete Onboarding 🎉</button>`}
+  </div>`;
+  return `<div class="step-hero">
+    <div class="step-badge"><span class="step-num">Step ${i+1}</span> · ${step.section}</div>
+    <div class="step-title">${step.icon} ${step.label}</div>
+    <div class="step-desc">${stepDesc(step.id)}</div>
+  </div>
+  <div class="step-content">${banner}${content}${notes}</div>${nav}`;
+}
+function buildNotesPanel(stepId,p){
+  const notes=p.notes&&p.notes[stepId]||'';
+  return `<div class="notes-card">
+    <div class="notes-card-label">📝 Step Notes</div>
+    <textarea class="notes-area" id="notes-${stepId}" placeholder="Add links, logins, context, or reminders…" onblur="saveNote('${stepId}')">${notes}</textarea>
+  </div>`;
+}
+function saveNote(stepId){
+  const p=partners[currentPartner];if(!p.notes)p.notes={};
+  const el=document.getElementById(`notes-${stepId}`);
+  if(el){p.notes[stepId]=el.value;saveAll();}
+}
+
+// ── AI BOX ──
+function aiTitle(id){
+  const m={market:'Market Intelligence Brief',strat:'Strategyzer Punchlines & Strategy Brief',metadata:'Meta Titles & Descriptions — Top 10 Pages',llms:'LLMS.txt — Ready to Copy & Paste',gmb:'Google Business Profile — Complete Copy',descriptiondoc:'Perfect Description Doc'};
+  return m[id]||id;
+}
+function buildAIBox(id,title,p){
+  const out=p.aiOutputs&&p.aiOutputs[id];
+  return `<div class="ai-output-box">
+    <div class="ai-box-header">
+      <div style="display:flex;align-items:center"><span class="ai-badge">AI</span><span class="ai-box-title">${title}</span></div>
+    </div>
+    <div class="ai-box-body ${out?'':'loading'}" id="ai-out-${id}">${out?out:'<span class="spinner" style="border-top-color:var(--blue)"></span> Generating with AI… please wait.'}</div>
+    <div class="ai-actions" id="ai-actions-${id}">${out?actionBtns(id):''}</div>
+  </div>`;
+}
+function actionBtns(id){return `<button class="copy-btn" onclick="copyAI('${id}')">📋 Copy</button><button class="regen-btn" onclick="regenAI('${id}')">🔁 Regenerate</button>`;}
+function buildInstructionStep(step,p){
+  return `<div class="instruction-box">
+    <div class="instruction-label">📋 How to complete this step</div>
+    <div class="instruction-text">${getInstructions(step.id,p)}</div>
+  </div>`;
+}
+
+// ── AI CALLS ──
+async function runAI(stepId,force=false){
+  const p=partners[currentPartner];if(!p)return;
+  const el=document.getElementById(`ai-out-${stepId}`);if(!el)return;
+  if(!force&&p.aiOutputs&&p.aiOutputs[stepId]){
+    el.innerHTML=p.aiOutputs[stepId];el.classList.remove('loading');
+    const acts=document.getElementById(`ai-actions-${stepId}`);if(acts)acts.innerHTML=actionBtns(stepId);return;
+  }
+  el.classList.add('loading');
+  el.innerHTML='<span class="spinner" style="border-top-color:var(--blue)"></span> Generating with AI… please wait.';
+  const acts=document.getElementById(`ai-actions-${stepId}`);if(acts)acts.innerHTML='';
+  try{
+    const res = await fetch('/api/chat', {
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:buildPrompt(stepId,p)}]})
+    });
+    const data=await res.json();
+    const text=data.content&&data.content[0]&&data.content[0].text||'Could not generate output.';
+    const fmt=text.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/#{1,3} (.*?)(<br>|$)/g,'<b style="color:var(--blue);font-size:15px;display:block;margin-top:10px">$1</b>');
+    if(!p.aiOutputs)p.aiOutputs={};p.aiOutputs[stepId]=fmt;saveAll();
+    if(el){el.innerHTML=fmt;el.classList.remove('loading');}
+    if(acts)acts.innerHTML=actionBtns(stepId);
+  }catch(e){if(el){el.textContent='Error generating. Please try again.';el.classList.remove('loading');}}
+}
+function regenAI(id){const p=partners[currentPartner];if(p.aiOutputs)delete p.aiOutputs[id];saveAll();runAI(id,true);}
+function copyAI(id){
+  const el=document.getElementById(`ai-out-${id}`);
+  navigator.clipboard.writeText(el.innerText).then(()=>{
+    const btn=document.querySelector(`#ai-actions-${id} .copy-btn`);
+    if(btn){btn.textContent='Copied!';setTimeout(()=>btn.textContent='📋 Copy',2000);}
+  });
+}
+
+// ── PROMPTS ──
+function buildPrompt(stepId,p){
+  const stratNote=p.strat?`\n\nStrategyzer Document Content:\n${p.strat.slice(0,3000)}`:'';
+  const base=`Practice: ${p.name}\nWebsite: ${p.url}\nLocation: ${p.location}${stratNote}`;
+  const map={
+    market:`${base}\n\nYou are a dental marketing strategist. Create a punchy, scannable Market Intelligence Brief. Short, bold, energetic. No long paragraphs.\n\n🏙️ THE MARKET IN 3 WORDS\n[3 words describing the competitive landscape in ${p.location}]\n\n🎯 THEIR IDEAL PATIENT — IN ONE SENTENCE\n[One crystal-clear sentence]\n\n💥 THE BIGGEST OPPORTUNITY RIGHT NOW\n[2-3 sentences max. What gap can this practice own?]\n\n🥊 WHO THEY'RE REALLY COMPETING WITH\n• [Competitor type 1 — one line]\n• [Competitor type 2]\n• [Competitor type 3]\n\n⚡ THEIR UNFAIR ADVANTAGE\n[1-2 sentences. What do they have that no one else does?]\n\n🏆 THE POSITIONING STATEMENT — OWN THIS\n"[One powerful ownable sentence specific to ${p.location}]"\n\n🚀 THE #1 CAMPAIGN ANGLE TO LEAD WITH\n[One sentence — the single strongest message for all paid campaigns]\n\nPunchy, confident language. Think agency creative brief, not academic report.`,
+    strat:`${base}\n\nYou are a marketing strategist reviewing a dental partner's Strategyzer intake document. Extract and organize:\n\n1. SUPERPOWER (1-2 sentences)\n2. IDEAL PATIENT (who they serve best)\n3. SUCCESS METRICS (what winning looks like)\n4. TOP PRIORITY (their #1 goal right now)\n5. KEY PUNCHLINES (3-5 powerful phrases for ads, landing pages, social)\n6. BRAND VOICE (2-3 adjectives)\n7. RECOMMENDED CAMPAIGN ANGLE (one core message to lead everything)\n\nBe crisp and strategic. Pull directly from their document.`,
+    metadata:`${base}\n\nSEO specialist. Generate optimized meta titles and descriptions for the top 10 core pages.\n\nPages: Homepage, About Us, Braces, Invisalign, Children's Orthodontics, Adult Orthodontics, Retainers, Financing, Contact/Book, Reviews.\n\nFor each:\n- Meta Title (50-60 chars, include ${p.location} where relevant)\n- Meta Description (140-160 chars, include CTA)\n\nMake each unique and keyword-rich.`,
+    llms:`${base}\n\nGenerate a complete LLMS.txt file for this dental practice. Plain text, no markdown styling, ready to paste at the website root.\n\nSections:\n# About\n# Services\n# Location\n# Why Choose Us\n# Contact\n# Key Facts`,
+    gmb:`${base}\n\nLocal SEO specialist. Write world-class Google Business Profile copy:\n\n1. BUSINESS DESCRIPTION (750 chars max — compelling, keyword-rich, ends with CTA)\n2. SHORT DESCRIPTION (250 chars)\n3. SERVICES LIST (10-15 services with names + brief descriptions)\n4. Q&A SECTION (10 common patient questions + ideal answers)\n5. GOOGLE POSTS — 3 ready-to-post posts (offer, update, event)\n6. RECOMMENDED ATTRIBUTES\n\nLocally optimized for ${p.location}.`,
+    descriptiondoc:`${base}\n\nDirect-response copywriter. Create the Perfect Description Doc — master copy reference for all marketing.\n\n1. ELEVATOR PITCH (30 seconds, spoken)\n2. ONE-LINER (10 words or less)\n3. HOMEPAGE HERO HEADLINE + SUBHEADLINE\n4. AD HEADLINES (10 Google Ads headlines, 30 chars each)\n5. AD DESCRIPTIONS (5 Google Ads descriptions, 90 chars each)\n6. META AD COPY (3 Facebook/Instagram primary text variations)\n7. EMAIL SUBJECT LINES (5 for new patient welcome)\n8. SMS TEMPLATE (booking confirmation)\n9. BRAND VOICE GUIDE (3 dos, 3 don'ts)\n\nBase everything on their Strategyzer document. Make it excellent.`
+  };
+  return map[stepId]||`Write helpful marketing guidance for ${stepId} for ${p.name}`;
+}
+
+// ── INSTRUCTIONS ──
+function getInstructions(id,p){
+  const n=p.name,u=p.url;
+  const m={
+    pixels:`<b>1.</b> Log into Google Tag Manager for <b>${n}</b>.<br><b>2.</b> Use Preview mode to confirm GTM fires on every page of <b>${u}</b>.<br><b>3.</b> Verify: Google Ads tag, Meta Pixel, and CallRail script are all active.<br><b>4.</b> Use the Chrome <b>Tag Assistant</b> extension for a final check.<br><b>5.</b> Screenshot confirmation and save to the client folder.`,
+    conversions:`<b>1.</b> Google Ads → Goals → Conversions.<br><b>2.</b> Create actions for: Phone calls (website), Form submissions, Booking completions, Live chat.<br><b>3.</b> Mark ALL as "Primary" — not just LP conversions.<br><b>4.</b> Cross-reference with GA4.<br><b>5.</b> Verify data flows within 24–48 hours.`,
+    cyfe:`<b>1.</b> Log into CYFE — create a sub-account for ${n}.<br><b>2.</b> Add widgets: Google Ads (spend + conversions), GA4 (sessions + goals), Meta Ads (reach + leads), CallRail (call volume).<br><b>3.</b> Set auto-email weekly to the client.<br><b>4.</b> Brand with the OM Performance Marketing logo.`,
+    clientgpt:`<b>1.</b> Log into ClientGPT — create a new client profile for <b>${n}</b>.<br><b>2.</b> Upload the Strategyzer doc and any existing marketing assets.<br><b>3.</b> Set the practice's tone, specialty, and key differentiators.<br><b>4.</b> Test with 3–5 sample patient inquiries to confirm response quality.`,
+    sitemap:`<b>1.</b> Locate the XML sitemap at <b>${u}/sitemap.xml</b>.<br><b>2.</b> Log into Google Search Console for the property.<br><b>3.</b> Navigate to Indexing → Sitemaps → Submit.<br><b>4.</b> Paste the full sitemap URL and click Submit.<br><b>5.</b> Confirm "Success" status within 24 hours.`,
+    maxconv:`<b>1.</b> Open each active campaign in Google Ads for ${n}.<br><b>2.</b> Settings → Bidding → select "Maximize Conversions."<br><b>3.</b> Do NOT set a target CPA at launch — let it learn for 2–4 weeks.<br><b>4.</b> Document the change with a timestamp note.`,
+    allconv:`<b>1.</b> Google Ads → Goals → Conversions.<br><b>2.</b> Every conversion source marked as "Primary."<br><b>3.</b> Include: website calls, forms, bookings, chat.<br><b>4.</b> Cross-reference with GA4.<br><b>5.</b> Do NOT limit to LP conversions only.`,
+    nosearch:`<b>1.</b> Open each Search campaign in Google Ads.<br><b>2.</b> Settings → Networks.<br><b>3.</b> Uncheck "Include Google search partners" AND "Include Display Network."<br><b>4.</b> Save. Budget goes to Google Search only.<br><b>5.</b> Verify every time a new campaign is created.`,
+    sitelinks:`<b>1.</b> Google Ads → Assets → Sitelinks.<br><b>2.</b> Create 6+ sitelinks (Book Now, Services, About, Reviews, Financing, Contact).<br><b>3.</b> Add Callout extensions ("No-Wait Appointments", "Same-Day Consults").<br><b>4.</b> Add Call extension with the practice phone number.<br><b>5.</b> Confirm all assets are approved before launch.`,
+    metarm:`<b>1.</b> Meta Ads Manager → New Retargeting campaign for ${n}.<br><b>2.</b> Audience: website visitors (14–30 days), video viewers, page engagers.<br><b>3.</b> Budget: 25% of total Meta budget.<br><b>4.</b> Creative: testimonials, before/after, strong social proof.<br><b>5.</b> Objective: Leads or Conversions. Run 4+ weeks before evaluating.`,
+    metaacq:`<b>1.</b> Meta Ads Manager → New Acquisition campaign.<br><b>2.</b> Objective: Conversions (Leads or Purchase).<br><b>3.</b> Budget: 50% of total Meta budget.<br><b>4.</b> Targeting: Broad OR interest-based (dental, health-conscious parents).<br><b>5.</b> Test 2–3 ad creative variations.`,
+    metatraf:`<b>1.</b> Meta Ads Manager → New Traffic campaign.<br><b>2.</b> Objective: Traffic → Link Clicks or Landing Page Views.<br><b>3.</b> Budget: 25% of total Meta budget.<br><b>4.</b> Goal: drive cold traffic to build the retargeting pool.<br><b>5.</b> Creative: educational, "Did you know?" style, or offer-based.`,
+    phone:`<b>1.</b> Audit every page of <b>${u}</b>.<br><b>2.</b> Phone number must be in the header/nav on every page — desktop AND mobile.<br><b>3.</b> On mobile: must be click-to-call.<br><b>4.</b> Use CallRail tracking number if set up.<br><b>5.</b> Flag for web team immediately if missing.`,
+    booknav:`<b>1.</b> Check the nav bar on <b>${u}</b> — desktop and mobile.<br><b>2.</b> Must have: "Book Now" button AND phone number in the top nav.<br><b>3.</b> NOT just in the footer.<br><b>4.</b> Button must be a contrasting color.<br><b>5.</b> Test the booking flow end-to-end.`,
+    cta:`<b>1.</b> Review the hero section on <b>${u}</b>.<br><b>2.</b> ONE clear CTA button — "Book Your Free Consultation" or "Schedule Now."<br><b>3.</b> Visible without scrolling on desktop and mobile.<br><b>4.</b> No competing CTAs in the hero.<br><b>5.</b> Brief the web team if missing.`,
+    h1:`<b>1.</b> Inspect the H1 tag on the homepage of <b>${u}</b>.<br><b>2.</b> Should NOT say "Welcome to ${n}."<br><b>3.</b> Example: "${p.location}'s Premier Orthodontic Transformations."<br><b>4.</b> Brief the web/SEO team if an update is needed.<br><b>5.</b> Ensure there is only ONE H1 per page.`,
+    servicepages:`<b>1.</b> Audit service and location pages on <b>${u}</b>.<br><b>2.</b> Each page needs: unique H1, keyword in URL, meta title/desc, CTA, 300+ words of original content.<br><b>3.</b> Location pages must include city/region naturally in copy, H1, and meta.<br><b>4.</b> Flag thin or duplicate pages for a content rewrite.<br><b>5.</b> Confirm internal linking between service pages and homepage.`,
+    reporting:`<b>1.</b> Set up a CallRail account for ${n} (or confirm one exists).<br><b>2.</b> Create unique tracking numbers per source: Google Ads, Meta Ads, Organic/Direct.<br><b>3.</b> Create a New Patient Tracking Spreadsheet: Month, New Patients, Source, Ad Spend, Cost Per Patient.<br><b>4.</b> Share access with the client and internal team.<br><b>5.</b> Set a monthly reminder to update and review on the strategy call.`,
+  };
+  return m[id]||'Complete this step manually and mark it done when finished.';
+}
+function stepDesc(id){
+  const m={
+    market:'AI-powered market intelligence — punchlines and positioning, not paragraphs.',
+    strat:'Key angles, punchlines, and strategy extracted directly from the uploaded Strategyzer PDF.',
+    pixels:'Every pixel must fire before a single dollar is spent.',
+    conversions:'Track every meaningful action — not just landing page form fills.',
+    cyfe:'Real-time reporting dashboard so the client sees results, always.',
+    clientgpt:'Configure the AI assistant with practice info for patient communication.',
+    descriptiondoc:'The master copy reference for every ad, landing page, and social post.',
+    metadata:'AI-generated, conversion-optimized meta copy for the core 10 pages.',
+    llms:'Help AI tools find, understand, and cite this practice accurately.',
+    sitemap:'Tell Google exactly what pages exist and when they were updated.',
+    gmb:'The #1 local SEO asset. Every section, written and ready to paste.',
+    maxconv:'Let Google\'s algorithm maximize conversions. Set it and let it learn.',
+    allconv:'Every call, form, chat, and booking must count as a conversion.',
+    nosearch:'Search Network only. No dilution. No wasted budget on Display.',
+    sitelinks:'Fill every extension to dominate SERP real estate.',
+    metarm:'Keep the practice top of mind for warm audiences at 25% of budget.',
+    metaacq:'Conversion-objective acquisition — 50% of social budget on new patients.',
+    metatraf:'Traffic campaigns feed the retargeting pool at 25% of budget.',
+    phone:'Always visible. Always clickable. No hunting.',
+    booknav:'Book and Call in the nav on every single page. Non-negotiable.',
+    cta:'One clear CTA above the fold. One action. One focus.',
+    h1:'Brand-forward, not generic. Lead with the promise.',
+    servicepages:'Optimized for both conversion and local SEO. No thin pages.',
+    reporting:'No tracking = flying blind. CallRail or a new patient spreadsheet, now.',
+  };
+  return m[id]||'Complete this step to move forward.';
+}
+
+// ── MARK DONE ──
+function markDone(i){
+  const p=partners[currentPartner];if(!p.checks)p.checks={};
+  p.checks[STEPS[i].id]=true;saveNote(STEPS[i].id);saveAll();renderSidebar();updateProgress();renderStep(i+1);
+}
+function markDoneFinish(i){
+  const p=partners[currentPartner];if(!p.checks)p.checks={};
+  p.checks[STEPS[i].id]=true;saveNote(STEPS[i].id);saveAll();renderSidebar();updateProgress();showCelebration();
+}
+function showCelebration(){
+  const p=partners[currentPartner];
+  const el=document.createElement('div');el.className='celebration';
+  el.innerHTML=`<div class="confetti-row">🎉 🦷 🎯 🚀 🎉</div>
+    <h1>Foundation Complete!</h1>
+    <p>${p.name} is fully onboarded and ready to launch.<br>Every item on the checklist is done.</p>
+    <button class="btn btn-primary" style="font-size:16px;padding:16px 32px" onclick="this.parentElement.remove();showScreen('dash-screen');renderDash()">Back to Dashboard</button>`;
+  document.body.appendChild(el);
+}
+
+// ── EXPORT ──
+function exportReport(){
+  const p=partners[currentPartner];const lines=[];
+  lines.push('OM PERFORMANCE MARKETING — ONBOARDING REPORT');
+  lines.push(`Partner: ${p.name} | ${p.url} | ${p.location}`);
+  lines.push(`Progress: ${calcPct(p)}%\n${'='.repeat(60)}\n`);
+  STEPS.forEach(s=>{
+    const done=p.checks&&p.checks[s.id]?'✓ DONE':'○ PENDING';
+    const note=p.notes&&p.notes[s.id]?`\n   Note: ${p.notes[s.id]}`:'';
+    lines.push(`[${done}] ${s.label}${note}`);
+  });
+  if(p.aiOutputs&&Object.keys(p.aiOutputs).length){
+    lines.push(`\n${'='.repeat(60)}\nAI OUTPUTS\n${'='.repeat(60)}`);
+    Object.keys(p.aiOutputs).forEach(k=>{
+      lines.push(`\n--- ${aiTitle(k).toUpperCase()} ---`);
+      const d=document.createElement('div');d.innerHTML=p.aiOutputs[k];lines.push(d.innerText);
+    });
+  }
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`OM-Onboarding-${p.name.replace(/\s+/g,'-')}.txt`;a.click();
+}
+
+loadAll();
+</script>
+</body>
+</html>
