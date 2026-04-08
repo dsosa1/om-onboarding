@@ -279,19 +279,30 @@ async function loadAll(){
       body:JSON.stringify({action:'get',key:'om-partners-v3'})
     });
     const d = await r.json();
-    console.log('LOAD RESULT RAW:', JSON.stringify(d).substring(0,200));
-    let val = d.value;
-    // Handle if Upstash returns array format ["key","value"]
-    if(Array.isArray(val)) val = val[1];
-    if(typeof val === 'string' && val !== 'null' && val.length > 0){
+    const val = d.value;
+    console.log('TYPE:', typeof val);
+    console.log('IS ARRAY:', Array.isArray(val));
+    console.log('VAL PREVIEW:', JSON.stringify(val).substring(0,300));
+    
+    if(!val || val === 'null') return;
+    
+    if(Array.isArray(val)){
+      // try each element
+      for(const item of val){
+        try{ partners=JSON.parse(item); console.log('PARSED FROM ARRAY ITEM'); break; }catch(e){}
+      }
+    } else if(typeof val === 'object'){
+      partners = val;
+      console.log('USED AS OBJECT');
+    } else if(typeof val === 'string'){
       partners = JSON.parse(val);
+      console.log('PARSED FROM STRING');
     }
   }catch(e){
     console.error('Load error:', e);
   }
   renderDash();
 }
-
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 // ── PDF READING ──
