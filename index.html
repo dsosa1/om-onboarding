@@ -260,13 +260,11 @@ let partners={}, currentPartner=null, currentStepIndex=0, pendingPDFText='';
 // ── STORAGE ──
 async function saveAll(){
   try{
-    const r = await fetch('/api/chat',{
+    await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'set',key:'om-partners-v3',value:JSON.stringify(partners)})
     });
-    const d = await r.json();
-    console.log('SAVE RESULT:', JSON.stringify(d));
   }catch(e){
     console.error('Save error:', e);
   }
@@ -279,25 +277,15 @@ async function loadAll(){
       body:JSON.stringify({action:'get',key:'om-partners-v3'})
     });
     const d = await r.json();
-    const val = d.value;
-    console.log('TYPE:', typeof val);
-    console.log('IS ARRAY:', Array.isArray(val));
-    console.log('VAL PREVIEW:', JSON.stringify(val).substring(0,300));
-    
-    if(!val || val === 'null') return;
-    
-    if(Array.isArray(val)){
-      // try each element
-      for(const item of val){
-        try{ partners=JSON.parse(item); console.log('PARSED FROM ARRAY ITEM'); break; }catch(e){}
-      }
-    } else if(typeof val === 'object'){
-      partners = val;
-      console.log('USED AS OBJECT');
-    } else if(typeof val === 'string'){
-      partners = JSON.parse(val);
-      console.log('PARSED FROM STRING');
+    let val = d.value;
+    // Upstash wraps in ["key","value"] array format as a string
+    if(typeof val === 'string'){
+      const parsed = JSON.parse(val);
+      if(Array.isArray(parsed)) val = parsed[1];
+      else val = parsed;
     }
+    if(typeof val === 'string') val = JSON.parse(val);
+    if(val && typeof val === 'object') partners = val;
   }catch(e){
     console.error('Load error:', e);
   }
