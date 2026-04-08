@@ -10,18 +10,13 @@ export default async function handler(req, res) {
         headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` },
       });
       const d = await r.json();
-      // Upstash returns {result: "value"}
       return res.status(200).json({ value: d.result });
     }
 
     if (action === 'set') {
-      const r = await fetch(`${process.env.KV_REST_API_URL}/set/${key}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ value }),
+      // Send value as plain string in the URL, not as JSON body
+      const r = await fetch(`${process.env.KV_REST_API_URL}/set/${key}/${encodeURIComponent(value)}`, {
+        headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` },
       });
       const d = await r.json();
       return res.status(200).json({ ok: true });
