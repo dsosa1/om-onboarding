@@ -279,9 +279,12 @@ async function loadAll(){
       body:JSON.stringify({action:'get',key:'om-partners-v3'})
     });
     const d = await r.json();
-    console.log('LOAD RESULT:', JSON.stringify(d));
-    if(d.value && d.value !== 'null'){
-      partners = JSON.parse(d.value);
+    console.log('LOAD RESULT RAW:', JSON.stringify(d).substring(0,200));
+    let val = d.value;
+    // Handle if Upstash returns array format ["key","value"]
+    if(Array.isArray(val)) val = val[1];
+    if(typeof val === 'string' && val !== 'null' && val.length > 0){
+      partners = JSON.parse(val);
     }
   }catch(e){
     console.error('Load error:', e);
