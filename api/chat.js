@@ -14,14 +14,17 @@ export default async function handler(req, res) {
     }
 
     if (action === 'set') {
-      const encoded = encodeURIComponent(value);
-      const r = await fetch(`${process.env.KV_REST_API_URL}/set/${key}/${encoded}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` },
-      });
-      const d = await r.json();
-      return res.status(200).json({ ok: true, debug: d });
-    }
+  const r = await fetch(`${process.env.KV_REST_API_URL}/set/${key}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ value }),
+  });
+  const d = await r.json();
+  return res.status(200).json({ ok: true, debug: d });
+}
 
     // Anthropic AI call
     delete body.action;
