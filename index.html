@@ -260,12 +260,16 @@ let partners={}, currentPartner=null, currentStepIndex=0, pendingPDFText='';
 // ── STORAGE ──
 async function saveAll(){
   try{
-    await fetch('/api/chat',{
+    const r = await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'set',key:'om-partners-v3',value:JSON.stringify(partners)})
     });
-  }catch(e){console.error('Save error',e);}
+    const d = await r.json();
+    console.log('SAVE RESULT:', JSON.stringify(d));
+  }catch(e){
+    console.error('Save error:', e);
+  }
 }
 async function loadAll(){
   try{
