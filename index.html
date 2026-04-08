@@ -164,7 +164,8 @@ label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bot
   </div>
   <div class="dash-body">
     <div class="dash-title">Partner Dashboard</div>
-    <div class="dash-sub">Track onboarding progress for every dental partner.</div>
+   <div class="dash-sub">Track onboarding progress for every dental partner.</div>
+<input type="text" id="partner-search" placeholder="🔍  Search partners..." oninput="renderDash()" style="width:300px;margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;outline:none"/>
     <div id="partners-grid" class="partners-grid"></div>
     <div id="empty-state" class="empty-state" style="display:none">
       <div class="empty-icon">🦷</div>
@@ -256,8 +257,27 @@ const AI_STEPS=['market','strat','metadata','llms','gmb','descriptiondoc'];
 let partners={}, currentPartner=null, currentStepIndex=0, pendingPDFText='';
 
 // ── STORAGE ──
-async function saveAll(){try{await window.storage.set('om-partners-v3',JSON.stringify(partners));}catch(e){}}
-async function loadAll(){try{const r=await window.storage.get('om-partners-v3');if(r)partners=JSON.parse(r.value);}catch(e){}renderDash();}
+async function saveAll(){
+  try{
+    await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'set',key:'om-partners-v3',value:JSON.stringify(partners)})
+    });
+  }catch(e){console.error('Save error',e);}
+}
+async function loadAll(){
+  try{
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'get',key:'om-partners-v3'})
+    });
+    const d=await r.json();
+    if(d.value)partners=JSON.parse(d.value);
+  }catch(e){console.error('Load error',e);}
+  renderDash();
+}
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
@@ -296,7 +316,9 @@ function calcPct(p){return Math.round((STEPS.filter(s=>p.checks&&p.checks[s.id])
 function renderDash(){
   const grid=document.getElementById('partners-grid');
   const empty=document.getElementById('empty-state');
-  const keys=Object.keys(partners);
+  const q=document.getElementById('partner-search');
+const search=q?q.value.toLowerCase():'';
+const keys=Object.keys(partners).filter(k=>partners[k].name.toLowerCase().includes(search));
   if(!keys.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   grid.innerHTML=keys.map(k=>{
