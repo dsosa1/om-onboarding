@@ -4,6 +4,9 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
+    // Force correct model name
+    body.model = 'claude-sonnet-4-5';
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -15,6 +18,12 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    // If Anthropic returned an error, pass it through so we can see it
+    if (data.error) {
+      return res.status(400).json({ error: data.error });
+    }
+
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
