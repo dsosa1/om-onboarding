@@ -276,18 +276,17 @@ async function loadAll(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'get',key:'om-partners-v3'})
     });
-    const d = await r.json();
-    let val = d.value;
-    // Upstash wraps in ["key","value"] array format as a string
-    if(typeof val === 'string'){
-      const parsed = JSON.parse(val);
-      if(Array.isArray(parsed)) val = parsed[1];
-      else val = parsed;
+    const text = await r.text();
+    console.log('RAW RESPONSE:', text.substring(0,500));
+    const d = JSON.parse(text);
+    console.log('VALUE TYPE:', typeof d.value);
+    console.log('VALUE:', JSON.stringify(d.value).substring(0,300));
+    if(d.value){
+      if(typeof d.value === 'string') partners = JSON.parse(d.value);
+      else if(typeof d.value === 'object') partners = d.value;
     }
-    if(typeof val === 'string') val = JSON.parse(val);
-    if(val && typeof val === 'object') partners = val;
   }catch(e){
-    console.error('Load error:', e);
+    console.error('Load error:', e.message);
   }
   renderDash();
 }
