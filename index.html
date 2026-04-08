@@ -319,7 +319,7 @@ function renderDash(){
   const empty=document.getElementById('empty-state');
   const q=document.getElementById('partner-search');
 const search=q?q.value.toLowerCase():'';
-const keys=Object.keys(partners).filter(k=>partners[k].name.toLowerCase().includes(search));
+const keys=Object.keys(partners).filter(k=>partners[k]&&partners[k].name&&partners[k].name.toLowerCase().includes(search));
   if(!keys.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   grid.innerHTML=keys.map(k=>{
