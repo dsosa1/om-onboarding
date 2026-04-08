@@ -273,14 +273,19 @@ async function saveAll(){
 }
 async function loadAll(){
   try{
-    const r=await fetch('/api/chat',{
+    const r = await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'get',key:'om-partners-v3'})
     });
-    const d=await r.json();
-    if(d.value)partners=JSON.parse(d.value);
-  }catch(e){console.error('Load error',e);}
+    const d = await r.json();
+    console.log('LOAD RESULT:', JSON.stringify(d));
+    if(d.value && d.value !== 'null'){
+      partners = JSON.parse(d.value);
+    }
+  }catch(e){
+    console.error('Load error:', e);
+  }
   renderDash();
 }
 
